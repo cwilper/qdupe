@@ -5,9 +5,9 @@ A command-line utility to quickly find duplicate files, written in Python and in
 h2. Usage
 
 <pre>
-  $ bin/qdupe path [path..]
+  $ qdupe path [path..]
 </pre>
 
-h2. Algorithm
+h2. How It Works
 
-When you run qdupe, it will first scan all the files in the path(s) you specify, and organize them by size. Then, for each file of a given size, the first 4kb are compared. This quickly excludes obvious non-matching files. If the size and first 4kb of the files are equivalent, the remainder of the files are compared.
+Initially, qdupe scans all the files in the path(s) you specify and groups them by size. Then, for each file of a given size, the first 4kb are compared. This quickly excludes obvious non-matches. If the first 4kb of the files are equivalent, the remaining bytes of the files will then be compared. The size, MD5 hash, and paths will be reported for all duplicates found, followed by a summary.
