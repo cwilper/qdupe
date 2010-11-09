@@ -1,0 +1,13 @@
+h1. qdupe
+
+A command-line utility to quickly find duplicate files, written in Python and inspired by "FastDup":http://sourceforge.net/projects/fastdup/
+
+h2. Usage
+
+<pre>
+  $ bin/qdupe path [path..]
+</pre>
+
+h2. Algorithm
+
+When you run qdupe, it will first scan all the files in the path(s) you specify, and organize them by size. Then, for each file of a given size, the first 4kb are compared. This quickly excludes obvious non-matching files. If the size and first 4kb of the files are equivalent, the remainder of the files are compared.
