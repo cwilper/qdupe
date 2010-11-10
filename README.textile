@@ -2,6 +2,12 @@ h1. qdupe
 
 A command-line utility to quickly find duplicate files, written in Python and inspired by "FastDup":http://sourceforge.net/projects/fastdup/
 
+h2. Installation
+
+<pre>
+  $ easy_install qdupe
+</pre>
+
 h2. Usage
 
 <pre>
