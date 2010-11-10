@@ -1,118 +1,19 @@
 #!/usr/bin/env python
 
-import os, sys
-import hashlib
-from stat import *
-
-def scan(path, map):
-    stat = os.stat(path)
-    mode = stat[ST_MODE]
-    if S_ISDIR(mode):
-        for f in os.listdir(path):
-            scan(os.path.join(path, f), map)
-    elif S_ISREG(mode):
-        size = stat[ST_SIZE]
-        cpath = os.path.realpath(path)
-        paths = map.get(size)
-        if paths:
-            paths.add(cpath)
-        else:
-            map[size] = set([cpath]);
-    else:
-        print 'Skipping %s' % path
-
-def compare(paths, size):
-    # compare hashes of first 4k
-    map = {}
-    for path in paths:
-        hash = get_hash(path, 4096)
-        matching_paths = map.get(hash)
-        if matching_paths:
-            matching_paths.add(path)
-        else:
-            map[hash] = set([path])
-    num_dupes = 0
-    for hash in map.keys():
-        matching_paths = map.get(hash)
-        if len(matching_paths) > 1:
-            if (size > 4096):
-                num_dupes += compare_full(matching_paths, size)
-            else:
-                report_dupes(size, hash, matching_paths)
-                num_dupes += len(matching_paths) - 1
-    return num_dupes
-
-def compare_full(paths, size):
-    map = {}
-    for path in paths:
-        hash = get_full_hash(path)
-        matching_paths = map.get(hash)
-        if matching_paths:
-            matching_paths.add(path)
-        else:
-            map[hash] = set([path])
-    num_dupes = 0
-    for hash in map.keys():
-        matching_paths = map.get(hash)
-        if len(matching_paths) > 1:
-            report_dupes(size, hash, matching_paths)
-            num_dupes += len(matching_paths) - 1
-    return num_dupes
-
-def report_dupes(size, hash, paths):
-    print "%s files, %s bytes, md5=%s" % (len(paths), size, hash)
-    for path in paths:
-        print "\t%s" % path
-    print
-
-def get_hash(path, num_bytes):
-    f = open(path, "rb")
-    hash = hashlib.new("md5")
-    data = f.read(num_bytes)
-    hash.update(data)
-    f.close()
-    return hash.hexdigest()
-
-def get_full_hash(path):
-    f = open(path, "rb")
-    hash = hashlib.new("md5")
-    while True:
-        data = f.read(8192)
-        if not data:
-            break
-        hash.update(data)
-    f.close()
-    return hash.hexdigest()
+import qdupe
 
 if __name__ == '__main__':
     import sys
     import optparse
     parser = optparse.OptionParser(usage="Usage: %prog path [path..]")
-    
+    parser.add_option('-v', '--version', dest='version', action="store_true",
+                      help='print the version of qdupe and exit', default=False)
     (options, paths) = parser.parse_args()
+    if (options.version):
+        print "qdupe 0.1"
+        sys.exit(0)
     if len(paths) == 0:
         parser.print_help()
         sys.exit(1)
 
-    print "Scanning for files..."
-    map = {}
-    for path in paths:
-        scan(path, map);
-
-    total_files = 0
-    total_size = 0
-    num_dupes = 0
-    wasted_bytes = 0
-    print "Comparing %s sets of files..." % len(map.keys())
-    print
-    for size in map.keys():
-        paths = map.get(size)
-        total_files += len(paths)
-        if len(paths) > 1:
-            n = compare(paths, size)
-            num_dupes += n
-            wasted_bytes += n * size
-        total_size += size + len(paths)
-
-    print "Found %s duplicates (%s bytes wasted)" % (num_dupes, wasted_bytes)
-    print "Scanned %s files (%s bytes)" % (total_files, total_size)
+    qdupe.find_dupes(paths)
