@@ -11,7 +11,7 @@ Installation
 Usage
 -----
 
-    qdupe path [path..]
+    $ qdupe path [path..]
 
 How It Works
 ------------
