@@ -6,7 +6,7 @@ A command-line utility to quickly find duplicate files, written in Python and in
 Installation
 ------------
 
-    easy_install qdupe
+    $ [sudo] easy_install qdupe
 
 Usage
 -----
